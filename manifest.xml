@@ -1,27 +1,27 @@
 <course>
-<title>ФГОС СПО 18.02.09 МДК.01.01 Колонны насадочного типа</title>
+<title>ФГОС СПО 18.02.09 МДК 02.01 Подготовка нефти и газа к переработке</title>
 <description/>
 <language>ru</language>
 <!-- Что это? -->
-<code>301121129</code> 
+<code>301121149</code> 
 <!-- Что это? -->
 <fgos_title>ФГОС СПО 18.02.09</fgos_title>
 <fgos_text>Переработка нефти и газа</fgos_text>
-<mdk_title>МДК.01.01</mdk_title>
-<mdk_text>Технологическое оборудование и коммуникации</mdk_text>
+<mdk_title>МДК 02.01</mdk_title>
+<mdk_text>Управление технологическим процессом</mdk_text>
 <structure>
 <item0>
-<name>Колонны насадочного типа
+<name>Подготовка нефти и газа к переработке
 </name>
 <code>1_eom</code>
 </item0>
 <item1>
-<name>Колонны насадочного типа
+<name>Подготовка нефти и газа к переработке
 </name>
 <code>2_eom</code>
 </item1>
 <item2>
-<name>Колонны насадочного типа
+<name>Подготовка нефти и газа к переработке
 </name>
 <code>3_eom</code>
 </item2>

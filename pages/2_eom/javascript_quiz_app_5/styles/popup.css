@@ -1,5 +1,5 @@
 .popup_text{
-    height: 700px;
+    height: 85% !important;
     overflow-y: auto;
     scroll-snap-align: start;
     padding: 15px;
@@ -139,9 +139,8 @@
 .popup_content {
     background-color: white;
     color: black;
-    min-width: 700px;
-    max-width: 1500px;
-    height: 770px;
+    width: clamp(300px,80vw,1800px) !important;
+    height: clamp(300px,80vh,1000px) !important;
     border-radius: 25px;
     padding: 25px;
 }

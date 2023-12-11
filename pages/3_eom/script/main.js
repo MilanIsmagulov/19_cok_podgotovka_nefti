@@ -1,535 +1,416 @@
-// Сообщение о загрузке скрипта
-console.log('Script is loaded');
+let scoreEl = document.getElementById("score");
+let livesEl = document.getElementById("lives");
+let score = 0;
+let lives = 10;
+let countCorrectAnswered = 0;
+let countAnswered = 0;
 
-// Объявление переменных HTML классы элементов
-const QuestionDiv = document.querySelector('.questions_cards_side');
-const pointsOfCorrectAnswers = [];
+let questionsBtn;
 
+let popUpContent = document.getElementById("popup_content");
+let popUpWindow = document.getElementById("popup_window");
+let popUpClose = document.getElementById("popup_close");
+let popUpBottom;
 
-// Создаваемые элементы в DOM
-let veryEasyQuestions = document.querySelector('.very_easy_questions');
-let easyQuestions = document.querySelector('.easy_questions');
-let middleQuestions = document.querySelector('.middle_questions');
-let middleHardQuestions = document.querySelector('.middle_hard_questions');
-let HardQuestions = document.querySelector('.hard_questions');
-let PopUpWindow = document.querySelector('#popup_main_1');
-let closePopUpButton = document.querySelector('#close_popup_button_1');
-let correctMarkerPlace = document.querySelector('#correct_marker_1');
+let dragNdropObject;
+let dropTarget;
+let dragFrom;
 
+let currentQuestionId = -1;   
+let currentQuestionType = 0;
+let currentQuestionButton;
 
-// Вытаскиваем ID кнопок из HTML
-let pointsOfAttempt = 10;
-let parseQuestionPlace = document.querySelector('#text_question_1');
-let pointsOfAttemptPlace = document.querySelector('#points_of_attempt_1');
-let popupsPart = document.querySelector('#popup_answers_1');
+// Массив путей для состояния вопроса
+const questionsStates = [
+    "./content/incorrect.svg",
+    "./content/correct.svg"
+    ];
 
+// Главный скрипт. Запускается как только полностью загрузится страница
+document.addEventListener('DOMContentLoaded', function(){ 
 
-// Массив с вопросами
-let mainQuestions = [
-    {
-        text: 'Под управлением технологическим процессом следует понимать:', //Текст вопроса 
-        right: [1], // Номер правильного ответа, поскольку это массив то отсчет идет от нуля
-        type: 1, // Поменять тип вопроса, 1 это закрытый с одним ответом, 2 это закрытый с одним вариантом и изображением, 3 это закрытый с несколькими, 4 как 3 + картинка 
-        points: 100, // Не трогай
-        answers: ['корректировку параметров процесса по результатам выборочного контроля параметров продукции для технологического обеспечения требуемого качества', 'совокупность операций, необходимых для осуществления таких целей, как пуск и остановка технологического процесса, поддержание какого-либо параметра процесса на заданном уровне и т. п.', 'совокупность единичных операций, образующих  конкретные технологические процессы и выполняющие определенные операции по пуску и остановке технологического процесса',], // Варианты ответа
-    }, // Следующий вопрос 
-    {
-        text: 'Систему автоматического управления образуют:',
-        right: [3],
-        type: 1,
-        sourceImg: './content/03_01.png',
-        points: 100,
-        answers: ['управляющее устройство и органы воздействия на объект управления', 'объект управления и усилительный элемент', 'объект управления и измерительный элемент', 'объект управления и управляющее устройство',],
-    },
-    {
-        text: 'Какую задачу выполняет устройство управления в системах по отклонению:',
-        right: [1],
-        type: 1,
-        points: 100,
-        answers: ['измерения возмущающего воздействия и выработки регулирующего воздействия для его компенсации', 'устранения отклонения управляемой величины от задающей', 'измерения задающего воздействия и выработки на его основе регулирующего воздействия', 'измерения задающего и возмущающего воздействий и выработки с учетом этих измерений регулирующего воздействия',],
-    },
-    {
-        text: 'К методам разрушения водонефтяных эмульсий относятся:',
-        right: [0,2,4],
-        type: 3,
-        points: 150,
-        answers: ['электрохимический', 'гидравлический', 'механический', 'динамический', 'термохимический'],
-    },
-    {
-        text: 'По содержанию парафинов выделяют такие группы нефтей, как:',
-        right: [0,2,3],
-        type: 3,
-        points: 150,
-        answers: ['малопарафинистые', 'среднепарафинистые', 'парафинистые', 'высокопарафинистые',],
-    },
-    {
-        text: 'На какие группы классифицируются НПЗ по выпускаемой продукции.',
-        right: [0,1,2,5],
-        type: 3,
-        // sourceImg: './content/03_01.png',
-        points: 150,
-        answers: ['топливно-нефтехимического профиля', 'топливного профиля', 'топливно-масляно-нефтехимического профиля', 'нефтехимического профиля', 'масляного профиля','топливно-маслянного профиля'],
-    },
-    {
-        text: 'Разрушение эмульсий – это основа, процесса:',
-        right: [2],
-        type: 1,
-        points: 200,
-        answers: ['обессоливания', 'стабилизации', 'обезвоживания', 'ректификации',],
-    },
-    {
-        text: 'Какой процесс основан на искусственном создании водонефтяной эмульсии для последующего ее разрушения:',
-        right: [0],
-        type: 1,
-        points: 200,
-        answers: ['обессоливание', 'стабилизация', 'обезвоживание', 'ректификация',],
-    },
-    {
-        text: 'Процесс, осуществляемый для сокращения потерь нефти при транспортировке:',
-        right: [1],
-        type: 1,
-        points: 200,
-        answers: ['обессоливание', 'стабилизация', 'обезвоживание', 'ректификация',],
-    },
-    {
-        text: 'Какие процессы протекают на установках ЭЛОУ:',
-        right: [0,2],
-        type: 3,
-        points: 250,
-        answers: ['обессоливание', 'стабилизация', 'обезвоживание', 'ректификация',],
-    },
-    {
-        text: 'Какие процессы используют при осушке газа:',
-        right: [5],
-        type: 1,
-        points: 250,
-        answers: ['стабилизация', 'обезвоживание', 'ректификация', 'обессоливание', 'абсорбция'],
-    },
-    {
-        text: 'Какие установки применяются при большом содержании растворенных газов:',
-        right: [1],
-        type: 1,
-        points: 250,
-        answers: ['одноколонные', 'двухколонные', ],
-    },
-    {
-        text: 'Колонна, работа которой осуществляется при давлении выше атмосферного:',
-        right: [0],
-        type: 1,
-        points: 300,
-        answers: ['атмосферная', 'работающая под повышенным давлением', 'вакуумная',],
-    },
-    {
-        text: 'Колонна, предназначенная для фракционирования мазута:',
-        right: [2],
-        type: 1,
-        points: 300,
-        answers: ['атмосферная', 'работающая под повышенным давлением', 'вакуумная'],
-    },
-    {
-        text: 'Какой вид короткого замыкания изображен на рисунке.',
-        right: [1],
-        type: 1,
-        sourceImg: './content/1.png',
-        points: 300,
-        answers: ['атмосферная', 'работающая под повышенным давлением', 'вакуумная',],
-    },
-];
+    // Сообщение о загрузке скрипта
+    console.log('Script is loaded');
 
-
-
-
-
-// Цикл создающий модальные окна, также пушит вопросы и ответы
-for (i = 0; i < mainQuestions.length; i++){
-    pointsOfAttemptPlace.innerHTML = pointsOfAttempt;
-    let popUpPlace = document.createElement('div');
-    popUpPlace.classList.add('popup' , 'closed');
-
-    popUpPlace.id = 'popup' + '_' + i;
-    popupsPart.appendChild(popUpPlace);
-
-    let popUpBody = document.createElement('div');
-    popUpBody.classList.add('popup_body');
-    popUpBody.id = 'popup_body_' + '_' + i;
-
-    popUpPlace.appendChild(popUpBody);
-    
-    let popUpContentWindow = document.createElement('div');
-    popUpContentWindow.classList.add('popup_content');
-    popUpContentWindow.id = 'popup_content' + '_' + i;
-
-    popUpBody.appendChild(popUpContentWindow);
-
-    let closePopupButton = document.createElement('div');
-    closePopupButton.classList.add('close_popup');
-    
-
-    let questionsPlace = document.createElement('div');
-    questionsPlace.classList.add('questions');
-    questionsPlace.id = 'question_number' + '_' + i;
-    questionsPlace.innerHTML = mainQuestions[i].text;
+    // Каждой кнопке присваиваем обработчик события handleQuestionClick, 
+    // который будет открывать соответствующее модальное окно
+    questionsBtn = document.getElementsByClassName('question');
+    for (question of questionsBtn){
+        question.addEventListener('click', handleQuestionClick);
+    }
+    // DEBUGGING
     
     
+    
+});
 
-    popUpContentWindow.appendChild(closePopupButton);
+// Обработчик события - клик на кнопку вопроса на главной странице
+function handleQuestionClick(e){
+    currentQuestionButton = e.srcElement;
+    currentQuestionId = this.className.split(" ")[1].replace("id", "");
+    popUpQuestionOpen();
+}
 
-    closePopupButton.appendChild(questionsPlace);
+// Обработчик события, если нажали на кнопку "Ответить". Собираем ответы, проверяем их, записываем
+function submitHandler(e){
+    e.preventDefault();
 
-    let answerPlace = document.createElement('div');
-    answerPlace.classList.add('answers_btn');
-    answerPlace.id = 'answers_buttons' + '_' + i;
+    let answers = getUserAnswers(e);
 
-    popUpContentWindow.appendChild(answerPlace);
+    if (userHasAnswers(answers)){
+        console.log("USER ANSWERS: " + `${answers}`);
+        userAnswersHandler(answers);
+        popUpQuestionOpen();
+    }else{
+        showErrors(e);
+    }
+    
+}
 
-//Один ответ без картинки 
-    if(mainQuestions[i].type == 1){
+// Получаем ответы пользователя, в нужном нам формате
+function getUserAnswers(el){
+    let arr = [];
+    let textAnsw = [];
+    let trueAnsw = allQuestions[currentQuestionId].answers;
 
-        let form = document.createElement('form');
-        form.classList.add('answer_form');
-        form.id = 'answer_form_' + i;
+    if (currentQuestionType == 5){
+        let rawAnsw = document.getElementsByClassName("custom-dropdown-input-placeholder");
+        for (el of rawAnsw){
+            textAnsw.push(el.innerHTML);
+            if (el.innerHTML == "Выберите ответ") textAnsw.push(-1);
+        }
+
+        for (let i = 0; i < textAnsw.length; i++) arr.push(trueAnsw.indexOf(textAnsw[i]));
         
-        answerPlace.appendChild(form);
-        form.dataset.right = mainQuestions[i].right;
-    
-        for (let answer of mainQuestions[i].answers) {
-            let j = 0;
-            let divInp = document.createElement('div');
-            divInp.classList = ('answer_div');
-            form.appendChild(divInp);
-    
-            let input = document.createElement('input');
-            input.type = 'radio';
-            input.name = j++;
-            divInp.appendChild(input);
-            let answ = document.createElement('p');
-            answ.innerHTML = answer;
-            divInp.appendChild(answ);
-            if (mainQuestions[i].answers.length > 4){
-                divInp.classList.add('small');
-            }
-        };
-    };
-
-//Подозреваю, что несколько ответов и картинка
-    if(mainQuestions[i].type == 2){
-        let mainWindow = document.createElement('div');
-        mainWindow.classList = ('second_type_questions');
-        mainWindow.id = 'second_type_question_' + i;
-        answerPlace.appendChild(mainWindow);
-
-        let secondTypeImg = document.createElement('img');
-        secondTypeImg.src = mainQuestions[i].sourceImg
-        mainWindow.appendChild(secondTypeImg);
-
-        let form = document.createElement('form');
-        form.classList.add('answer_form');
-        form.id = 'answer_form_' + i;
-        mainWindow.appendChild(form);
-        form.dataset.right = mainQuestions[i].right;
-
-        for (let answer of mainQuestions[i].answers) {
-            let j = 0;
-            let divInp = document.createElement('div');
-            divInp.classList = ('answer_div');
-            form.appendChild(divInp);
-
-            let input = document.createElement('input');
-            input.type = 'radio';
-            input.name = j++;
-            divInp.appendChild(input);
-            let answ = document.createElement('p');
-            answ.innerHTML = answer;
-            divInp.appendChild(answ);
-            if (mainQuestions[i].answers.length > 4){
-                divInp.classList.add('small');
-            }
-        };
-    };
-
-//Несколько ответов без картинки
-    if(mainQuestions[i].type == 3){
-        let form = document.createElement('form');
-        form.classList.add('answer_form');
-        form.id = 'answer_form_' + i;
-        answerPlace.appendChild(form);
-        form.dataset.right = mainQuestions[i].right;
-    
-        for (let answer of mainQuestions[i].answers) {
-            let j = 0;
-            let divInp = document.createElement('div');
-            divInp.classList = ('answer_div');
-            form.appendChild(divInp);
-    
-            let input = document.createElement('input');
-            input.type = 'checkbox';
-            input.name = j++;
-            divInp.appendChild(input);
-            let answ = document.createElement('p');
-            answ.innerHTML = answer;
-            divInp.appendChild(answ);
-            if (mainQuestions[i].answers.length > 4){
-                divInp.classList.add('small');
-            }
-        };
-    };
-
-
-    //Один ответ одна картинка
-    if(mainQuestions[i].type == 4){
-        let mainWindow = document.createElement('div');
-        mainWindow.classList = ('second_type_questions');
-        mainWindow.id = 'second_type_question_' + i;
-        answerPlace.appendChild(mainWindow);
-
-        let secondTypeImg = document.createElement('img');
-        secondTypeImg.src = mainQuestions[i].sourceImg
-        mainWindow.appendChild(secondTypeImg);
-
-        let form = document.createElement('form');
-        form.classList.add('answer_form');
-        form.id = 'answer_form_' + i;
-        mainWindow.appendChild(form);
-        form.dataset.right = mainQuestions[i].right;
-
-        for (let answer of mainQuestions[i].answers) {
-            let j = 0;
-            let divInp = document.createElement('div');
-            divInp.classList = ('answer_div');
-            form.appendChild(divInp);
-    
-            let input = document.createElement('input');
-            input.type = 'checkbox';
-            input.name = j++;
-            divInp.appendChild(input);
-            let answ = document.createElement('p');
-            answ.innerHTML = answer;
-            divInp.appendChild(answ);
-            if (mainQuestions[i].answers.length > 4){
-                divInp.classList.add('small');
-            }
-        };
-    };
-
-
-    let mainButtonsPlace = document.createElement('div');
-    mainButtonsPlace.classList.add('main_buttons');
-    answerPlace.appendChild(mainButtonsPlace);
-
-    
-    let checkAnswerBtn = document.createElement('button');
-    checkAnswerBtn.classList.add('check_button');
-    checkAnswerBtn.id = 'check_button' + '_' + i;
-    checkAnswerBtn.innerHTML = 'Ответить';
-
-    //Добавление ивента для проверки ответов
-
-    checkAnswerBtn.addEventListener('click',function(event)
-    {
-        let rightcheck = false
-        //Получения номера вопроса и блока вопросов
-        let questionsblock = event.target.parentNode.parentNode.firstElementChild
-        let question_number = questionsblock.id.split('_')
-        question_number=question_number[question_number.length-1]
-        //Проверка чекбоксов на пустой ответ
-        for (let elem of questionsblock.querySelectorAll(".answer_div")) 
-		{
-            if(elem.firstElementChild.checked)
-            {
-                rightcheck=true
-                break
-            }
-        }
-        if (!rightcheck){
-            return 0;
-        }
-        pointsOfAttempt-=1
-
+    }else if (currentQuestionType == 3 || currentQuestionType == 4) {
+        let dropZones = el.target.getElementsByClassName(`question_type_${currentQuestionType}_answer_drop_zone`);
         
+        for (el of dropZones){
+            for (drop of el.children) textAnsw.push(drop.innerHTML);
+        }
         
-        if (pointsOfAttempt < 0)
-        { 
-            return 0;//добавлено, чтобы после измены html кода disabled , проверка ответа не происходила. (простыми словами завершение функции)
-        }
-        pointsOfAttemptPlace.innerHTML = pointsOfAttempt;
-        if (pointsOfAttempt < 1)
-        {
-            //Отключение кнопок ответа
-            for(let elem of document.querySelectorAll('.check_button')){
-                resultButtonDis.classList.remove('disabled_button')
-                resultPopUp.classList.remove('disabled_button')
-                elem.disabled = true;
-                elem.classList.add('disable_answer_btn');
-                
-            }
-            // Отключение кнопок вопросов 
-            for(let i = 0; i < 5; i++){
-                for(let j = 0; j < 3; j++){
-                    cardsPlace.children[i].children[j].disabled = true;
-                }
-            }
-            
+        for (let i = 0; i < textAnsw.length; i++) arr.push(trueAnsw.indexOf(textAnsw[i]));
+
+        if (currentQuestionType == 4){
+            let countItemDropZone = dropZones[0].children.length;
+            let leftSide = arr.splice(0,countItemDropZone);
+            arr = [leftSide.sort((a, b) => a - b), arr.sort((a, b) => a - b)]; 
         }
 
-        //Обработка
-        let counter=0 // Для получения порядкового номера
-        for (let elem of questionsblock.querySelectorAll(".answer_div")) 
-		{
-            if(elem.firstElementChild.checked){
-                // Проверка есть ли в массиве правильных ответов этот вариант ответа(counter)
-                if (mainQuestions[question_number].right.indexOf(counter) != -1){
-                    elem.classList.add('correct')
-                }
-                else
-                {
-                    elem.classList.add('incorrect')
-                    rightcheck=false
-                }
+        console.log(arr);
+
+    }else if (currentQuestionType == 2){
+
+        for (el of el.target.getElementsByClassName("custom-dropdown-input-placeholder")) 
+            textAnsw.push(el.innerHTML);
+
+        for (let i = 0; i < trueAnsw.length; i++){
+            for (let j = 0; j < trueAnsw[i].length; j++){
+                if (textAnsw[i] == trueAnsw[i][j]) arr.push(j);
             }
-            else{
-                //Выделение правильных ответов, если они не выбраны
-                if (mainQuestions[question_number].right.indexOf(counter) != -1){
-                    elem.classList.add('correct')
-                }
-            }
-            counter++
         }
-        //Создание кнопки закрытия
-        let popUpPlace = document.getElementById('popup_' + question_number);
-        let closeButton = document.createElement('button');
-        closeButton.addEventListener('click', function(){
-            popUpPlace.classList.add('closed');
-            popUpPlace.classList.remove('open');
-        });
-
-        closeButton.classList.add('close_popup_button');
-        closeButton.id = 'close_popup_button' + '_' + i;
-        closeButton.innerHTML = '<img src="./content/close.svg" alt="close_popup">';
-        document.getElementById('popup_content_'+question_number).firstElementChild.appendChild(closeButton);
-
         
+    }else {
+        for (el of el.target) if(el.checked) arr.push(parseInt(el.value));
+    }
 
+    return arr;
+}
 
-        if (rightcheck){
-            //В случае правильного ответа
-            //Не знаю зачем нужен именно массив правильных очков, но допустим
-            pointsOfCorrectAnswers.push(mainQuestions[question_number].points)
-            updatescore()
-            event.target.parentNode.innerHTML="<p> За этот вопрос вы могли получили " + mainQuestions[question_number].points + " очков </p>"
+// Проверка, ответил ли пользователь НА САМОМ ДЕЛЕ
+function userHasAnswers(answers){
+    //return allQuestions[currentQuestionId].correctAnswer.length === answers.length;
 
-		//Добавление галочки пройдено
-            let imgCorrect = document.createElement('img')
-            imgCorrect.src = './content/enab.png'
-            document.querySelector('[onclick="showQuestion(' + question_number +')"').appendChild(imgCorrect);
-            
+    if (currentQuestionType == 0 || currentQuestionType == 1 ) {
+        return answers.length > 0;
+    }else if (currentQuestionType == 2 || currentQuestionType == 3 ||currentQuestionType == 5 ){
+        return allQuestions[currentQuestionId].correctAnswer.length === answers.length;
+    }else if(currentQuestionType == 4){
+        let sumOfCorrect = 0;
+        let sumOfUsers = 0;
+        for (let i = 0; i < allQuestions[currentQuestionId].correctAnswer.length; i++)
+            for (let j = 0; j < allQuestions[currentQuestionId].correctAnswer[i].length; j++)
+                sumOfCorrect++;
 
-        }
-        else
-	{
-            //Добавление крестика неправильного ответа
-            event.target.parentNode.innerHTML="<p> За этот вопрос вы могли получить " + mainQuestions[question_number].points + " очков </p>"
-            let imgCorrect = document.createElement('img');
-            imgCorrect.src = './content/dis.png';
-            document.querySelector('[onclick="showQuestion(' + question_number +')"').appendChild(imgCorrect);
-        }
-
-    })
-
-
-    mainButtonsPlace.innerHTML = '<p>' + 'За этот вопрос вы можете получить ' + mainQuestions[i].points + ' очков' + '</p>' + '<br>';
-
-    mainButtonsPlace.appendChild(checkAnswerBtn);
-    
-}; 
-//--------------------------------
-
-
-let checkAnswerButton = document.querySelectorAll('.check_button');
-let forms = document.querySelectorAll('form');
-let cardsPlace = document.querySelector('.questions_cards_side');
-
-
-let formsForAnswers = document.querySelectorAll('.answer_form');
-formsForAnswers.forEach((elem, index)=>{
-    let answerInput = document.querySelectorAll('.answer_div')
-    console.log(elem)
-})
-
-
-
-// Новые переменные связанные с созданными Модальными окнами
-let PopUp1 = document.querySelector('#popup_0');
-let PopUp2 = document.querySelector('#popup_1');
-let PopUp3 = document.querySelector('#popup_2');
-let PopUp4 = document.querySelector('#popup_3');
-let PopUp5 = document.querySelector('#popup_4');
-let PopUp6 = document.querySelector('#popup_5');
-let PopUp7 = document.querySelector('#popup_6');
-let PopUp8 = document.querySelector('#popup_7');
-let PopUp9 = document.querySelector('#popup_8');
-let PopUp10 = document.querySelector('#popup_9');
-let PopUp11 = document.querySelector('#popup_10');
-let PopUp12 = document.querySelector('#popup_11');
-let PopUp13 = document.querySelector('#popup_12');
-let PopUp14 = document.querySelector('#popup_13');
-let PopUp15 = document.querySelector('#popup_14');
-
-
-// Пушим переменные модальных окон в массив для удобного вызова функции
-popUpArr = [PopUp1, PopUp2, PopUp3, PopUp4, PopUp5, PopUp6, PopUp7, 
-PopUp8, PopUp9, PopUp10, PopUp11, PopUp12, PopUp13, PopUp14, PopUp15,];
-
-
-// Функция вызова модальных окон привязка по onclick html
-function showQuestion(i){
-    popUpArr[i].classList.remove('closed');  
-};
-
-
-
-//Сложение очков, для получения счёта( я не знаю зачем тут нужен был массив)
-function updatescore(){
-    let score=0
-    pointsOfCorrectAnswers.forEach(element => {
-        score+=element
-    
-    });
-    document.getElementById('points_of_correct_1').innerHTML = score
-    resultPopUpPoint.innerHTML = score
-
-   
-    answerDiagram.setAttribute('style', '--p:' + (score/1550)*100 + ';' + '--c:rgb(0, 114, 192);');
-
-
-    if (score < 1550){
-
-        messagePlace.innerHTML = 'Вы проиграли, поскольку не набрали нужное количество очков и потратили все попытки'
-        
-    } else {
-        messagePlace.innerHTML = 'Вы выйграли, поскольку набрали нужное количество очков'
-        resultPopUp.classList.remove('disabled_button')
-        resultButtonDis.classList.remove('disabled_button')
+        for (let i = 0; i < answers.length; i++)
+            for (let j = 0; j < answers[i].length; j++)
+                sumOfUsers++;
+        console.log(sumOfCorrect);
+        console.log(sumOfUsers);
+        return sumOfCorrect === sumOfUsers;
     }
 }
 
-let answerDiagram = document.querySelector('#answer_diagram_1');
-let resultButtonDis = document.querySelector('#result_button_3')
-resultButtonDis.classList.add('disabled_button')
-let updateScorePoint = document.querySelector('#points_of_correct_1')
-let messagePlace =document.querySelector('#result_place_3')
-let resultPopUpPoint = document.querySelector('#place_question_point')
-resultPopUpPoint.innerHTML = 0
-let valueOfTests =document.querySelector('#place_question_number')
-valueOfTests.innerHTML = pointsOfAttempt
-let resultPopUp = document.querySelector('#result_popup_1')
-resultPopUp.classList.add('disabled_button')
-function showResultPopUP(){
-    resultPopUp.classList.remove('disabled_button')
+function showErrors(e){
+
+    let elToErrors = [];
+
+    if (currentQuestionType == 0 || currentQuestionType == 1 ) {
+        for (let i = 0; i < allQuestions[currentQuestionId].answers.length; i++)
+                elToErrors.push(document.getElementById(`question_type_${currentQuestionType}_answer_${i}`));
+    }else if (currentQuestionType == 2 || currentQuestionType == 5){
+        for (let i = 0; i < allQuestions[currentQuestionId].answers.length; i++){
+            txtAnswer = document.getElementById(`question_type_${currentQuestionType}_answer_${i}`).childNodes[0].innerHTML
+            if (txtAnswer == "Выберите ответ")
+                elToErrors.push(document.getElementById(`question_type_${currentQuestionType}_answer_${i}`));
+        }
+    } else if(currentQuestionType == 3){
+        let dragZones = e.target.getElementsByClassName(`question_type_${currentQuestionType}_answer_drop_zone`);
+        for (el of dragZones) {
+            if (el.children.length == 0) elToErrors.push(el);
+        }
+    } else if(currentQuestionType == 4){
+        console.log(e.target);
+        let dragItems = e.target.getElementsByClassName(`question_type_4_answers`)[0].children;
+        for (el of dragItems) elToErrors.push(el);
+    }
+
+    for (el of elToErrors){
+        el.setAttribute("class",`${el.className} un_answered`);
+    }
+
+    document.getElementById("question_text").innerHTML = 
+        allQuestions[currentQuestionId].text +" Выберите ответ!";
 }
 
-function closeResultPopUp(){
-    resultPopUp.classList.add('disabled_button')
+// Функция установки состояния вопроса: Пройден(1), Не пройден(0).
+function setStateToQuestion(el, state) {
+
+    let stateImgDiv = document.createElement("div");
+    stateImgDiv.setAttribute("class", "state_marker")
+
+    let stateImg = document.createElement("img");
+    stateImg.setAttribute("src", questionsStates[state]);
+    stateImgDiv.appendChild(stateImg);
+
+    el.appendChild(stateImgDiv);
 }
+
+// Функция открытия модального окна
+function popUpQuestionOpen(result = false){
+
+    // Подготовка к созданию окна. Удаляем тело прошлого модального окна, если есть
+    deletePopUpMain()
+
+    currentQuestionType = allQuestions[currentQuestionId].type;
+
+    constuctPopUp(result);
+
+    popUpWindow.setAttribute("class", "popup unclosed");
+}
+
+// Функция закрытия модального окна
+function popUpQuestionClose(){
+    popUpWindow.setAttribute("class", "popup closed");  
+}
+
+// Функция конструирования блока с вопросом/результатом
+function constuctPopUp(result){
+    let question = allQuestions[currentQuestionId];
+
+    console.log(`CONSTRUCT QUESTION TYPE ${question.type} AND ID ${currentQuestionId}`);
+
+    // Создаем тело модального окна
+    if (!result) popUpWindow.appendChild(createPopUpMain(question));
+        else popUpWindow.appendChild(createResult());
+
+    popUpBottom = document.getElementById("popup_bottom");
+
+    if (question.answered == null) createDragNDropHandlers(question);
+}
+
+// Функция, указывающая пройден ли конкретный вопрос
+function questionIsPassed(question){
+
+    if(question.answered != null) return true;
+    return false;
+    
+}
+
+// Функция, обрабатывающая ответ пользователя
+function userAnswersHandler(userAnswers){
+    let currentQuestion = allQuestions[currentQuestionId];
+
+    // Записываем ответ пользователя в соответствующее поле объекта вопроса
+    currentQuestion.answered = userAnswers;
+    // Проверяем, верный ли был ответ, ставим соответсвующее изображение на кнопку
+    isCorrect = answerIsCorrect(currentQuestion, userAnswers);
+    console.log(`IS CORRECT? ${isCorrect}`);
+
+    if (isCorrect) {
+        setStateToQuestion(currentQuestionButton, 1);
+        score += currentQuestion.price;
+        countCorrectAnswered++;
+    }
+    else {
+        setStateToQuestion(currentQuestionButton, 0);
+    }
+
+    scoreEl.innerHTML = `${score}`;
+    lives--;
+    livesEl.innerHTML = `${lives}`;
+    countAnswered++;
+
+    // Если кончились жизни ИЛИ на все вопросы ответили
+    if (lives <= 0 || countAnswered == allQuestions.length){
+        // Отключаем клик на неотвеченных вопросах
+        // Создаем кнопку результатов
+        setTestCompleted();
+    }
+}
+
+// Функция, возвращающее, верный ли был ответ
+function answerIsCorrect(question, userAnswers){
+    corrects = question.correctAnswer;
+    userAnswers = userAnswers;
+    if (currentQuestionType == 4){
+        for (let i = 0; i < corrects.length; i++)
+            if (corrects[i].toString() != userAnswers[i].toString())
+                return false;
+        return true;
+    }
+    else if (corrects.toString() === userAnswers.toString()) 
+        return true;
+
+    return false;
+}
+
+// Функция обработчик события "Взяли объект"
+// function dragNdropHandler(e){
+//     console.log("DRAG-N-DROP");
+//     dragFrom = e.target.parentNode;
+//     console.log(`FROM ${dragFrom}`);
+    
+//     // Создание точной копии объекта
+//     dragNdropObject = e.target;
+//     // e.target.parentNode.appendChild(clone);
+//     // e.target.remove();
+    
+//     // даём элементу абсолютную позицию, да бы перемещать без нарушения верстки
+//     // и перемещаем его на позицию курсора
+//     dragNdropObject.style.position = 'absolute';
+//     dragMoveAt(e, dragNdropObject);
+
+//     // 3, перемещать по экрану
+//     document.onmousemove = function(e) {
+//         dragMoveAt(e, dragNdropObject);
+//     }
+
+//     // 4. отследить окончание переноса
+//     dragNdropObject.onmouseup = function() {
+//         document.onmousemove = null;
+//         dragNdropObject.onmouseup = null;
+//         dragNdropObject.remove();
+
+//         // Отслеживаем, где отпустили объект
+//         document.addEventListener('mouseover', (e) => dropObject(e), {once: true});
+        
+//     }
+// }
+
+// // Функция перемещения объекта и позиционирования его по центру
+// function dragMoveAt(e, el) {
+//     el.style.left = e.clientX - el.offsetWidth / 2 + 'px';
+//     el.style.top = e.clientY - el.offsetHeight / 2 + 'px';
+// }
+
+// // Функция обработчик, отслеживаем где отпустили объект и добавляем его в соотв. drop_zone
+// function dropObject(e){
+//     console.log("Функция обработчик, отслеживаем где отпустили объект и добавляем его в соотв. drop_zone");
+    
+//     let dropTarget = defineDropTarget(e);
+
+//     console.log(dropTarget);
+//     console.log(dropTarget.children.length > 0);
+
+
+
+//     switch(currentQuestionType){
+//         case 3:
+//             // В 3 типе вопросов: 
+//             // Если в таргете, куда перетаскиваем объект, уже что то есть, 
+//             // перемещаем содержимое на место, откуда взяли текущий объект
+//             if (dropTarget.children.length > 0) dragFrom.appendChild(dropTarget.children[0]);
+//             break;
+//         case 4:
+//             // В 3 типе вопросов: ничего не делаем
+//             break;
+//     }
+    
+//     dragNdropObject.classList.remove("un_answered");
+//     dropTarget.classList.remove("un_answered");
+//     dragNdropObject.addEventListener('mousedown', (e) => dragNdropHandler(e));
+//     dragNdropObject.style = null;
+//     dropTarget.appendChild(dragNdropObject);
+
+// }
+
+// function defineDropTarget(e){
+//     let dropTarget;
+//     console.log(currentQuestionType);
+//     console.log(e.target.className);
+//     switch(currentQuestionType){
+//         case 3:
+
+//             console.log(e.target.tagName);
+//             if (e.target.tagName == "IMG"){
+//                 console.log("ITS IMG");
+//                 let parents = e.target.parentNode.parentNode;
+//                 dropTarget = parents.getElementsByClassName(`question_type_3_answer_drop_zone`)[0];
+
+//             }else if (e.target.tagName == "DIV" && e.target.className == `question_type_3_answer`) {
+//                 console.log("ITS WHITE SPACE");
+//                 dropTarget = e.target.getElementsByClassName(`question_type_3_answer_drop_zone`)[0]; 
+//             }else if (e.target.className.indexOf(`drop_zone`) != -1){
+//                 console.log("ITS DROP SPACE");
+//                 dropTarget = e.target;
+
+//             }else if (e.target.tagName == "DIV" && e.target.className == `question_type_3_drag`){
+//                 console.log("ITS ANOTHER DROP");
+//                 dropTarget = e.target.parentNode;
+//             }else{
+                
+//                 console.log("ITS SOMETHERE");
+//                 // console.log(e.target);
+//                 // console.log(dragFrom);
+//                 dropTarget = dragFrom;
+//             }
+//             break;
+//         case 4:
+//             if (e.target.className.indexOf("drop_zone") != -1){
+//                 console.log("ITS DROP SPACE");
+//                 dropTarget = e.target;
+//             }else if(e.target.parentNode.className.indexOf("drop_zone") != -1){
+                
+//                 console.log("ITS ANOTHER DRAG IN DROP SPACE");
+//                 dropTarget = e.target.parentNode;
+//             }else{
+//                 console.log("ITS SOMETHERE");
+//                 dropTarget = dragFrom;
+//             }
+            
+            
+//             break;
+//     }
+
+//     return dropTarget;
+// }
+
+function setTestCompleted(){
+    for (question of questionsBtn){
+        console.log(question.children[0].children.length);
+        if(question.children[0].children.length != 1){
+            question.removeEventListener('click', handleQuestionClick);
+        }
+
+    }
+    let btn_res = document.getElementById("button_results");
+    btn_res.classList.toggle("btn_closed");
+    btn_res.addEventListener('click', function (e) {
+        popUpQuestionOpen(true);
+    });
+}
+
 
 
 

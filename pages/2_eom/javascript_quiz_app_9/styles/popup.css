@@ -1,6 +1,6 @@
 .popup_text{
 
-    height: 700px;
+    height: 85% !important;
     overflow-y: auto;
     scroll-snap-align: start;
     padding: 15px;

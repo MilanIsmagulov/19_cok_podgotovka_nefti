@@ -45,7 +45,7 @@ body{
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 95px;
+    height: initial !important;
     color: white;
     background-color: black;
 }
@@ -57,6 +57,7 @@ body{
     padding-right: 30px;
     border: solid 2px;
     border-radius: 35px;
+    text-wrap: nowrap;
     width: 300px;
     margin-left: 25px;
     transition: all 0.3s;

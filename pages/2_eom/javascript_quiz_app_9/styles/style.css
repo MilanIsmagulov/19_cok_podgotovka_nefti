@@ -18,6 +18,10 @@ body{
 
 }
 
+.answers_btn{
+    height: initial !important;
+}
+
 .first{
     display: flex;
     align-items: center;
@@ -49,7 +53,7 @@ body{
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 95px;
+    height: initial !important;
     color: white;
     background-color: black;
 }
@@ -61,6 +65,7 @@ body{
     padding-right: 30px;
     border: solid 2px;
     border-radius: 35px;
+    text-wrap: nowrap;
     width: 300px;
     margin-left: 25px;
     transition: all 0.3s;
@@ -224,8 +229,31 @@ ul li div{
     .step_marker_and_buttons{
         padding-bottom: 35px;
     }
+    .question_text{
+        height: 100%;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        margin: 0 !important;
+        padding: 0 !important;
+        justify-content: flex-start;
+    }
+    .right_side{
+        margin-left: 15px !important;
+    }
+    .left_side{
+        margin-left: 15px !important;
+    }
+    .step_marker_and_buttons{
+        align-items: center !important;
+        flex-direction: column !important;
+    }
 }
 
 .answers_btn img{
-    margin-right: 100px;
+    margin: 0 auto !important;
+}
+
+.step_marker_and_buttons{
+    padding-top: 0 !important;
+    padding: 25px !important;
 }

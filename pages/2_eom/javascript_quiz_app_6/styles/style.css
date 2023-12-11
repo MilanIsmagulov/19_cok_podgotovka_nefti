@@ -13,8 +13,16 @@ a{
     text-decoration: none;
 }
 
+p{
+    font-size: clamp(20px,1.4vw,30px) !important;
+}
+
 .second_draw{
     width: 90%;
+}
+
+.theory_eom{
+    height: initial !important;
 }
 
 body{
@@ -34,7 +42,7 @@ body{
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 95px;
+    height: initial !important;
     color: white;
     background-color: black;
 }
@@ -46,9 +54,15 @@ body{
     padding-right: 30px;
     border: solid 2px;
     border-radius: 35px;
+    text-wrap: nowrap;
     width: 300px;
     margin-left: 25px;
     transition: all 0.3s;
+}
+
+.main_image{
+    min-width: 650px;
+    width: 85% !important;
 }
 
 .black_header a:hover{
@@ -266,6 +280,10 @@ input:disabled {
     font-weight: 500;
 }
 
+.step_marker_and_buttons{
+    padding: 25px !important;
+}
+
 @media (max-width: 820px) {
     .black_header{
         height: 150px;
@@ -275,14 +293,6 @@ input:disabled {
         width: 70%;
     }
 
-    .step_marker_and_buttons{
-        display: flex;
-        width: 93vw;
-    }
-
-    .theory_eom{
-        height: 600px;
-    }
     .content{
         margin-right: 0;
     }

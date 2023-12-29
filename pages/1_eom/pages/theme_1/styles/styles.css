@@ -16,6 +16,11 @@ body{
     height: 100vh;
 }
 
+.op_md{
+    margin: 0 auto !important;
+    background-color: #fff !important;
+}
+
 .container{
     height: 100%;
 }

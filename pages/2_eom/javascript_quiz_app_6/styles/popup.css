@@ -1,11 +1,15 @@
 .popup_text{
-    height: 750px;
+    height: 85% !important;
     overflow-y: auto;
     scroll-snap-align: start;
     padding: 15px;
     align-items: flex-start;
     flex-direction: column;
     padding: 10px;
+}
+
+.popup_text img{
+    margin: 0 auto;
 }
 
 .popup_content_header{

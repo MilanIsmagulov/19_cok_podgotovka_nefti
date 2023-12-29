@@ -41,7 +41,7 @@ stepPlaceDescription.innerHTML = '<strong>' + numberOfQuestion + '/' + numberOfQ
 
 console.log('Script is Loaded')
 let checkBtn = document.querySelector('#check_button_1');
-let rightAnswers = ['1,2,3,4,5,6,7,8,9,10,11,12,13а,13в,13г,14,15,16,17,18','13б,14б,15б','19','28','29','30','31'];
+let rightAnswers = ['19','28','29','30','31'];
 checkBtn.addEventListener('click', function(){
     let inputs = document.querySelectorAll('#quiz_part input');
     let i = 0;
